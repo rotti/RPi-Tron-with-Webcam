@@ -1,13 +1,12 @@
 """
-RPi-Tron-Radio
-Raspberry Pi Web-Radio with 2.8" TFT Touchscreen and Tron-styled graphical interface
+RPi-Tron-Radio Clone ... added some more features (weather, confirmation, ...)
 
+BIG THANKS TO:
+Raspberry Pi Web-Radio with 2.8" TFT Touchscreen and Tron-styled graphical interface
 GitHub: http://github.com/5volt-junkie/RPi-Tron-Radio
 Blog: http://5volt-junkie.net
 
-
 MIT License: see license.txt
-
 
 """
 
@@ -19,11 +18,13 @@ import sys
 import os
 import glob
 import subprocess
+import re
+import requests
+import json
 
 os.environ["SDL_FBDEV"] = "/dev/fb1"
 os.environ["SDL_MOUSEDEV"] = "/dev/input/touchscreen"
 os.environ["SDL_MOUSEDRV"] = "TSLIB"
-
 
 #colors     R    G    B
 white   = (255, 255, 255)
@@ -36,13 +37,18 @@ magenta = (255,   0, 255)
 yellow  = (255, 255,   0)
 orange  = (255, 127,   0)
 
+#my vars. usally for counters
+vol_set = "0"
+wd_count = 0
+wd = ""
+fc = ""
+weather_id = "2871198"
 
 #screen size
 width  = 320
 height = 240
 size = (width, height)
 screen = pygame.display.set_mode(size)
-
 
 pygame.init()
 
@@ -52,9 +58,8 @@ pygame.mouse.set_visible(False)
 #define font
 font = pygame.font.Font(None, 25)
 
-
 #screensaver 
-screensaver_timer = 5     #time until screensaver will be enabled, in minutes
+screensaver_timer = 2     #time until screensaver will be enabled, in minutes
 screensaver = False
 
 #load default skin
@@ -64,10 +69,7 @@ max_skins = 8
 font_color = cyan
 skin1 = pygame.image.load("skins/skin_tron_m1.png")
 skin2 = pygame.image.load("skins/skin_tron_m2.png")
-
-
-
-
+skin3 = pygame.image.load("skins/skin_tron_m3.png")
 skin = skin1
 
 screen.blit(skin, (0, 0))
@@ -78,10 +80,10 @@ subprocess.call('mpc volume 100' , shell=True)
 reboot_label = font.render("rebooting...", 1, (font_color))
 poweroff_label = font.render("shutting down", 1, (font_color))
 
-
 song_title = " "
 playlist = " "
 
+#functions
 def reboot():
     screen.fill(black)
     screen.blit(reboot_label, (10, 100))
@@ -90,6 +92,65 @@ def reboot():
     subprocess.call('mpc stop' , shell=True)
     subprocess.call('reboot' , shell=True)
 
+
+def get_forecast():
+    request = requests.get('http://api.openweathermap.org/data/2.5/forecast/daily?id=' + weather_id, '&units=metric')
+    fc = request.json()
+    return fc
+
+
+def get_weather():
+    request = requests.get('http://api.openweathermap.org/data/2.5/weather?id=' + weather_id, '&units=metric')
+    wd = request.json()
+    return wd
+
+
+def show_weather(fc, wd):
+    skin = skin3
+  
+    day1_temp_day = fc['list'][1]['temp']['day']
+    day2_temp_day = fc['list'][2]['temp']['day']
+    day3_temp_day = fc['list'][3]['temp']['day']
+    day1_condition = fc['list'][1]['weather'][0]['description'] 
+    day2_condition = fc['list'][2]['weather'][0]['description'] 
+    day3_condition = fc['list'][3]['weather'][0]['description'] 
+
+    location = wd['name']
+    temp_now = wd['main']['temp']
+    temp_min_now = wd['main']['temp_min']
+    temp_max_now = wd['main']['temp_max']
+    wind_now = wd['wind']['speed']
+  
+    title = font.render("Day temp. (12:00) with condition ", 1, (font_color))
+  
+    day1_temp_day = font.render("+1 Days: " + unicode(day1_temp_day), 1, (font_color))
+    day2_temp_day = font.render("+2 Days: " + unicode(day2_temp_day), 1, (font_color))
+    day3_temp_day = font.render("+3 Days: " + unicode(day3_temp_day), 1, (font_color))
+    day1_condition = font.render(unicode(day1_condition), 1, (font_color))
+    day2_condition = font.render(unicode(day2_condition), 1, (font_color))
+    day3_condition = font.render(unicode(day3_condition), 1, (font_color))
+
+    location = font.render("Weather in: "+ location, 1, (font_color))
+    temp_now = font.render("Temperature: " + unicode(temp_now), 1, (font_color))
+    temp_min_now = font.render("Temp. min: " + unicode(temp_min_now), 1, (font_color))
+    temp_max_now = font.render("Temp. max: " + unicode(temp_max_now), 1, (font_color))
+    wind_now = font.render("Wind speed: " + unicode(wind_now), 1, (font_color))
+            
+    screen.blit(skin, (0, 0))
+    screen.blit(title, (17, 15))
+ 
+    screen.blit(day1_temp_day, (17, 40))
+    screen.blit(day2_temp_day, (17, 60))
+    screen.blit(day3_temp_day, (17, 80))
+    screen.blit(day1_condition, (150, 40))
+    screen.blit(day2_condition, (150, 60))
+    screen.blit(day3_condition, (150, 80))
+ 
+    screen.blit(location, (17, 130))
+    screen.blit(temp_now, (17, 150))
+    screen.blit(temp_min_now, (17, 170))
+    screen.blit(temp_max_now, (17, 190))
+    screen.blit(wind_now, (17, 210))
 
 
 def poweroff():
@@ -100,12 +161,14 @@ def poweroff():
     subprocess.call('mpc stop' , shell=True)
     subprocess.call('poweroff' , shell=True)
 
-#copy playing title to favorite.txt    
+
+#copy playing title to favorite.txt and add metadata like date   
 def favorite():
     print song_title
     
     f = open ('/var/www/favorite.txt' , 'a')
-    f.write('-' + song_title + '\n')
+    timestamp = time.strftime("%c")
+    f.write(timestamp + ' - ' + song_title + '\n')
     f.close()
 
 
@@ -145,27 +208,49 @@ def on_touch():
         #print "button8 was pressed"
         button(8)
 
+    #button 9 is bigger than the others
+    if 13 <= pos[0] <= 152 and 11 <= pos[1] <= 113:
+        #print "button9 was pressed"
+        button(9)
+
+
 #which button (and which menu) was presed on touch            
 def button(number):
         global menu
+        
         if menu == 1:
             if number == 1:
                 subprocess.call('mpc play' , shell=True)
                 #print "play"
 
             if number == 2:
-                subprocess.call('mpc pause' , shell=True)
-                #print "pause"
+                lines = subprocess.check_output('mpc', shell=True).split("\n")
+                status = re.search(r"\[(\w+)\]", lines[1])
+                status = status.group(1)
+                if status == "playing":
+                   print "pausing"
+                   subprocess.call('mpc pause' , shell=True)
+                   #print "pause"
+                if status == "paused":  
+                   print "playing"
+                   subprocess.call('mpc play' , shell=True)
 
             if number == 3:
                 subprocess.call('mpc volume +5' , shell=True)
-                
                 #print "vol +x"
-                 
 
             if number == 4:
-                subprocess.call('mpc volume 0' , shell=True)
-                #print "vol 0"
+                lines = subprocess.check_output('mpc volume', shell=True).split("\n")
+                vol_string = re.findall('\d+', lines[0])
+                vol_value = vol_string[0]
+                global vol_set
+                #when muted restore original volume
+                if vol_value == "0":
+                   subprocess.call('mpc volume ' + vol_set + '' , shell=True)
+                else: 
+                   vol_set = vol_value
+                   subprocess.call('mpc volume 0' , shell=True)
+                   #print "vol 0"
 
             if number == 5:
                 subprocess.call('mpc prev' , shell=True)
@@ -184,24 +269,40 @@ def button(number):
                 menu = 2
                 update_screen()
                 return
+            
+            if number == 9:
+                favorite()
 
         if menu == 2:
+
+            if number == 4:
+                get_weather()
+                get_forecast()
+                update_screen()
+
+            if number == 5:
+                #print "secret button found"
+                #for later use. tts the weather forecast maybe
+
+            if number == 8:
+                #print "go to menu 1"
+                menu = 3
+                update_screen()
+                return
+
+        if menu == 3:
             if number == 1:
                 favorite()
-                
 
             if number == 2:
                 #print "switch skin"
                 global skin_number
                 skin_number = skin_number+1
-                
-                
                 #print skin_number
                 update_screen()
 
             if number == 3:
                 #print "run in background"
-                
                 pygame.quit()
                 sys.exit()
 
@@ -222,15 +323,14 @@ def button(number):
             if number == 7:
                 #print "update screen"
                 update_screen()
-                
 
             if number == 8:
                 #print "go to menu 1"
                 menu = 1
                 update_screen()
                 return
-	
-                
+       
+
         
 #function to update screen
 def update_screen():
@@ -270,8 +370,6 @@ def update_screen():
         skin1 = pygame.image.load("skins/skin_yellow_m1.png")
         skin2 = pygame.image.load("skins/skin_yellow_m2.png")
         font_color = yellow
-
-    
     
         
     global menu
@@ -303,8 +401,6 @@ def update_screen():
             
             
             if line1.startswith("volume"):
-            
-                
                 title_label = font.render("Title: no data! Try with PLAY!", 1, (font_color))
     
 
@@ -314,8 +410,6 @@ def update_screen():
                 global song_title
                 song_title = line1
                 line1 = line1[:30]
-                
-                
                 
                 title_label = font.render(line1 + '.', 1, (font_color))
                 
@@ -336,7 +430,32 @@ def update_screen():
                
             pygame.display.flip()
             
+    
         if menu == 2:
+            skin = skin3
+
+            global wd
+            global fc
+            global wd_count
+
+            if wd_count == 0:
+               wd = get_weather()
+               fc = get_forecast()
+               wd_count = 1
+
+            #no data at all or empty wd string
+            if (wd is None) or (not wd):  
+               screen.blit(skin, (0, 0))
+               nildata = font.render('no data available', 1, (font_color))
+               screen.blit(nildata, (17, 150))
+               pygame.display.flip()
+
+            else:
+               show_weather(fc, wd)
+               pygame.display.flip()
+
+
+        if menu == 3:
             skin = skin2
 
             
@@ -347,18 +466,41 @@ def update_screen():
             screen.blit(ip_label, (23, 15))
 
             #get and display cpu temp
-            
             cpu_temp = subprocess.check_output('/opt/vc/bin/vcgencmd measure_temp', shell=True).strip()
             temp = font.render('cpu ' + cpu_temp, 1, (font_color))
             screen.blit(temp, (23, 35))
+            
+            #get and display ram
+            ram = subprocess.check_output('/usr/bin/free -h | /bin/grep Mem', shell=True).split()
+            ram = ram[0], '/'.join(ram[2:4])
+            ram = str(ram)
+            chars_to_remove = ['\'', '(', ')', ',']
+            ram = ram.translate(None, ''.join(chars_to_remove))
+            ram = font.render(ram, 1, (font_color))
+            screen.blit(ram, (23, 55))
 
             #get current time
-            
             screen.blit(time_label, (90, 90))
+
+            #procs
+            procs = subprocess.check_output('/bin/ps -e | /usr/bin/wc -l', shell=True).split()
+            procs = font.render('Procs: ' + procs[0], 1, (font_color))
+            screen.blit(procs, (165, 15))
+
+            #cpu usage
+            cpu = subprocess.check_output('/usr/bin/vmstat', shell=True).split()
+            cpu = str(100 - int(cpu[36]))
+            cpu = font.render('CPU usage: ' + cpu + '%', 1, (font_color))
+            screen.blit(cpu, (165, 35))
+
+            #diskfree
+            df = subprocess.check_output('/bin/df -h .', shell=True).split()
+            df = font.render('Disk: ' + df[11], 1, (font_color))
+            screen.blit(df, (165, 55))
             
             pygame.display.flip()
 
-    
+
         
         
     if screensaver == True:
@@ -366,13 +508,6 @@ def update_screen():
         pygame.display.flip()
 
 
-
-    
-    
-
-  
-    
-    
   
 minutes = 0
 #userevent on every 1000ms, used for screensaver
@@ -380,12 +515,10 @@ pygame.time.set_timer(USEREVENT +1, 60000)
 subprocess.call('mpc play' , shell=True)
 update_screen()
 running = True
-while running:
 
-        
+while running:
         
         for event in pygame.event.get():
-            
 
             if event.type == USEREVENT +1:
                 minutes += 1
@@ -405,14 +538,12 @@ while running:
             #just disable screensaver, reset timer and update screen
             #no button state will be checked
             if event.type == pygame.MOUSEBUTTONDOWN and screensaver == True:
-
                 minutes = 0
-		subprocess.call('echo 0 | sudo tee /sys/class/backlight/*/bl_power' , shell=True)
+		            subprocess.call('echo 0 | sudo tee /sys/class/backlight/*/bl_power' , shell=True)
                 screensaver = False
                 update_screen()
                 break
                 
-            
             #if screen was touched and screensaver is disabled,
             #get position of touched button, call on_touch(), reset timer and update screen
             if event.type == pygame.MOUSEBUTTONDOWN and screensaver == False:
@@ -422,11 +553,10 @@ while running:
                 update_screen()
                 
         
-        
         #enable screensaver on timer overflow
         if minutes > screensaver_timer:
             screensaver = True
-	    subprocess.call('echo 1 | sudo tee /sys/class/backlight/*/bl_power' , shell=True)	
+	          subprocess.call('echo 1 | sudo tee /sys/class/backlight/*/bl_power' , shell=True)	
             update_screen()
-        update_screen()
-        time.sleep(0.1)
+            update_screen()
+            time.sleep(0.1)
