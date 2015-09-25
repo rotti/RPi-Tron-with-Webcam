@@ -42,6 +42,7 @@ vol_set = "0"
 wd_count = 0
 wd = ""
 fc = ""
+confirm_reason = ""
 weather_id = "2871198"
 
 #screen size
@@ -70,6 +71,7 @@ font_color = cyan
 skin1 = pygame.image.load("skins/skin_tron_m1.png")
 skin2 = pygame.image.load("skins/skin_tron_m2.png")
 skin3 = pygame.image.load("skins/skin_tron_m3.png")
+skin4 = pygame.image.load("skins/skin_confirm.png")
 skin = skin1
 
 screen.blit(skin, (0, 0))
@@ -84,6 +86,26 @@ song_title = " "
 playlist = " "
 
 #functions
+def execute_action(action):
+    if action == "background":
+       run_background()
+    if action == "quit":
+       quit_radio()
+    if action == "halt":
+       poweroff()
+    if action == "reboot":
+       reboot()
+
+
+def poweroff():
+    screen.fill(black)
+    screen.blit(poweroff_label, (10, 100))
+    pygame.display.flip()
+    time.sleep(5)
+    subprocess.call('mpc stop' , shell=True)
+    subprocess.call('poweroff' , shell=True)
+
+
 def reboot():
     screen.fill(black)
     screen.blit(reboot_label, (10, 100))
@@ -91,6 +113,17 @@ def reboot():
     time.sleep(5)
     subprocess.call('mpc stop' , shell=True)
     subprocess.call('reboot' , shell=True)
+
+
+def quit_radio():
+    subprocess.call('mpc stop', shell=True)
+    pygame.quit()
+    sys.exit()
+
+
+def run_background():
+    pygame.quit()
+    sys.exit()
 
 
 def get_forecast():
@@ -103,6 +136,22 @@ def get_weather():
     request = requests.get('http://api.openweathermap.org/data/2.5/weather?id=' + weather_id, '&units=metric')
     wd = request.json()
     return wd
+
+
+def show_confirm(action):
+    if action == "background":
+       reason = "Do you want to SEND BACKGROUND?"
+    if action == "quit":
+       reason = "Do you want to QUIT?"
+    if action == "halt":
+       reason = "Do you want to SHUTDOWN?"
+    if action == "reboot":
+       reason = "Do you want to REBOOT?"
+
+    skin = skin4
+    screen.blit(skin, (0, 0))
+    confirm = font.render(reason, 1, (font_color))
+    screen.blit(confirm, (17, 150))
 
 
 def show_weather(fc, wd):
@@ -152,14 +201,6 @@ def show_weather(fc, wd):
     screen.blit(temp_max_now, (17, 190))
     screen.blit(wind_now, (17, 210))
 
-
-def poweroff():
-    screen.fill(black)
-    screen.blit(poweroff_label, (10, 100))
-    pygame.display.flip()
-    time.sleep(5)
-    subprocess.call('mpc stop' , shell=True)
-    subprocess.call('poweroff' , shell=True)
 
 
 #copy playing title to favorite.txt and add metadata like date   
@@ -213,10 +254,18 @@ def on_touch():
         #print "button9 was pressed"
         button(9)
 
+    if 90 <= pos[0] <= 152 and 36 <= pos[1] <= 87:
+        #print "button10 was pressed"
+        button(10)
+
+    if 167 <= pos[0] <= 229 and 36 <= pos[1] <= 87:
+        #print "button11 was pressed"
+        button(11)
 
 #which button (and which menu) was presed on touch            
 def button(number):
         global menu
+        global confirm_reason
         
         if menu == 1:
             if number == 1:
@@ -280,10 +329,6 @@ def button(number):
                 get_forecast()
                 update_screen()
 
-            if number == 5:
-                #print "secret button found"
-                #for later use. tts the weather forecast maybe
-
             if number == 8:
                 #print "go to menu 1"
                 menu = 3
@@ -302,26 +347,33 @@ def button(number):
                 update_screen()
 
             if number == 3:
-                #print "run in background"
-                pygame.quit()
-                sys.exit()
+                confirm_reason = "background"
+                menu = 4
+                update_screen()
+                return
 
             if number == 4:
-                #print "quit radio"
-                subprocess.call('mpc stop', shell=True)
-                pygame.quit()
-                sys.exit()
+                confirm_reason = "quit"
+                menu = 4
+                update_screen()
+                return
 
             if number == 5:
                 print "power off"
-                poweroff()
+                confirm_reason = "halt"
+                menu = 4
+                update_screen()
+                return
 
             if number == 6:
                 print "reboot"
-                reboot()
+                confirm_reason = "reboot"
+                menu = 4
+                update_screen()
+                return
 
             if number == 7:
-                #print "update screen"
+                print "update screen"
                 update_screen()
 
             if number == 8:
@@ -330,6 +382,20 @@ def button(number):
                 update_screen()
                 return
        
+
+        if menu == 4:
+            if number == 10:
+                print "execute the stuff"
+                execute_action(confirm_reason)
+            
+            if number == 11:
+                #print "go to menu 3"
+                confirm_reason = ""
+                menu = 3
+                update_screen()
+                return
+
+
 
         
 #function to update screen
@@ -373,6 +439,7 @@ def update_screen():
     
         
     global menu
+    global confirm_reason
 
     if screensaver == False:
         
@@ -455,7 +522,6 @@ def update_screen():
 
         if menu == 3:
             skin = skin2
-
             
             screen.blit(skin, (0, 0))
             #get and display ip
@@ -499,8 +565,13 @@ def update_screen():
             pygame.display.flip()
 
 
+        if menu == 4:
+            print confirm_reason
+            show_confirm(confirm_reason)
+            pygame.display.flip()
         
-        
+       
+
     if screensaver == True:
         screen.fill(white)
         pygame.display.flip()
