@@ -389,7 +389,6 @@ def update_screen():
                 line1 = line1[:-1]
                 station_label = font.render("Station: no data", 1, (font_color))
 
-
             else:
                 line1 = lines[0]
                 line2 = lines[1]
@@ -403,7 +402,6 @@ def update_screen():
             if line1.startswith("volume"):
                 title_label = font.render("Title: no data! Try with PLAY!", 1, (font_color))
     
-
             else:
                 line1 = lines[0]
                 line2 = lines[1]
@@ -539,7 +537,7 @@ while running:
             #no button state will be checked
             if event.type == pygame.MOUSEBUTTONDOWN and screensaver == True:
                 minutes = 0
-		            subprocess.call('echo 0 | sudo tee /sys/class/backlight/*/bl_power' , shell=True)
+	        subprocess.call('echo 0 | sudo tee /sys/class/backlight/*/bl_power' , shell=True)
                 screensaver = False
                 update_screen()
                 break
@@ -556,7 +554,7 @@ while running:
         #enable screensaver on timer overflow
         if minutes > screensaver_timer:
             screensaver = True
-	          subprocess.call('echo 1 | sudo tee /sys/class/backlight/*/bl_power' , shell=True)	
+	    subprocess.call('echo 1 | sudo tee /sys/class/backlight/*/bl_power' , shell=True)	
             update_screen()
             update_screen()
             time.sleep(0.1)

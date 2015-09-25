@@ -1,5 +1,7 @@
-RPi-Tron-Radio
-==============
+Rottis RPi-Tron-Radio Clone
+=============================
+All kudos should go to the initial project. I just forked it and made some further improvements (see below).
+
 [![Flattr this git repo](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?\user_id=5Volt-Junkie&url=https://github.com/5Volt-Junkie/RPi-Tron-Radio&title=RPi-Tron-Radio&\description=Raspberry_Pi_Internet_Radio&language=&\tags=github&category=software)
 
 ![Player](https://raw.githubusercontent.com/5Volt-Junkie/RPi-Tron-Radio/master/docu/RPi-Internet-Radio.png)
@@ -15,8 +17,9 @@ Also, you can visit the German Raspberry Pi Forum, where some guys made a bunch 
 
 
 Important: I'm testing it with [soma.fm streams] (http://somafm.com/) only. I don't know how good it works with another stations.
+Additional note: Works fine for the other stations I wanted. See 'add\_stations.sh' for my stations.
 
-## Features
+## Original Features
 * RPi-Tron-Radio runs through mpd and mpc.
 * 8 skin colors
 * Displays station data
@@ -51,4 +54,27 @@ Menu 1
 
 
 
+## Added Features
+* Display weather data:
+  * New skin
+  * Use API from openwaethermap.org
+  * Current weather for your location
+  * Forecast for your location
+  * Location can be set via ID from openweathermap.org
+  * Reload function
+  * Runs on screen 2
+* Radio Player
+  * Pause is now Pause/Play
+  * Unmute restores set volume
+  * Hidden button (upper left to the middle) to favorite song
+  * Favorite a song stores metadata (time, date) with song title
+* Status Screen
+  * Used and free memory
+  * CPU usage in %
+  * Number of running processes
+  * Disk free in % of /
+  * Runs on screen 3
 
+
+## Further tipps
+I installed [ympd](https://gist.github.com/nerab/37429abeaf4828484ab7) to get a small web service for the mpd. So I can operate the radio with my smartphone (or every other device with a web browser).
