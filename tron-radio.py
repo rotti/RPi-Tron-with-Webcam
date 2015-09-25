@@ -205,7 +205,7 @@ def show_weather(fc, wd):
 
 #copy playing title to favorite.txt and add metadata like date   
 def favorite():
-    print song_title
+    #print song_title
     
     f = open ('/var/www/favorite.txt' , 'a')
     timestamp = time.strftime("%c")
@@ -293,6 +293,7 @@ def button(number):
                 vol_string = re.findall('\d+', lines[0])
                 vol_value = vol_string[0]
                 global vol_set
+
                 #when muted restore original volume
                 if vol_value == "0":
                    subprocess.call('mpc volume ' + vol_set + '' , shell=True)
@@ -322,8 +323,8 @@ def button(number):
             if number == 9:
                 favorite()
 
-        if menu == 2:
 
+        if menu == 2:
             if number == 4:
                 get_weather()
                 get_forecast()
@@ -334,6 +335,7 @@ def button(number):
                 menu = 3
                 update_screen()
                 return
+
 
         if menu == 3:
             if number == 1:
