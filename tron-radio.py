@@ -21,6 +21,7 @@ import subprocess
 import re
 import requests
 import json
+import urllib2
 
 os.environ["SDL_FBDEV"] = "/dev/fb1"
 os.environ["SDL_MOUSEDEV"] = "/dev/input/touchscreen"
@@ -86,6 +87,14 @@ song_title = " "
 playlist = " "
 
 #functions
+def internet_on():
+    try:
+        response=urllib2.urlopen('http://74.125.228.100',timeout=1)
+        return True
+    except urllib2.URLError as err: pass
+    return False
+
+
 def execute_action(action):
     if action == "background":
        run_background()
@@ -127,15 +136,23 @@ def run_background():
 
 
 def get_forecast():
-    request = requests.get('http://api.openweathermap.org/data/2.5/forecast/daily?id=' + weather_id, '&units=metric')
-    fc = request.json()
-    return fc
+    if internet_on():
+       request = requests.get('http://api.openweathermap.org/data/2.5/forecast/daily?id=' + weather_id, '&units=metric')
+       fc = request.json()
+       return fc
+    else:
+       fc = ""
+       return fc
 
 
 def get_weather():
-    request = requests.get('http://api.openweathermap.org/data/2.5/weather?id=' + weather_id, '&units=metric')
-    wd = request.json()
-    return wd
+    if internet_on():
+       request = requests.get('http://api.openweathermap.org/data/2.5/weather?id=' + weather_id, '&units=metric')
+       wd = request.json()
+       return wd
+    else:
+       wd = ""
+       return wd
 
 
 def show_confirm(action):
