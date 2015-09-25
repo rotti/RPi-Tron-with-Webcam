@@ -1,6 +1,4 @@
 sudo mpc add http://mp3channels.webradio.antenne.de:80/antenne
-sudo mpc add http://streams.br.de/bayern2_2.m3u
-sudo mpc add http://streams.br.de/bayern3_2.m3u
 sudo mpc add http://mp3stream1.apasf.apa.at:8000
 sudo mpc add http://www.egofm.de/stream/192kb
 sudo mpc add http://energyradio.de/muenchen

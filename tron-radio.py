@@ -139,20 +139,18 @@ def get_forecast():
     if internet_on():
        request = requests.get('http://api.openweathermap.org/data/2.5/forecast/daily?id=' + weather_id, '&units=metric')
        fc = request.json()
-       return fc
     else:
        fc = ""
-       return fc
+    return fc
 
 
 def get_weather():
     if internet_on():
        request = requests.get('http://api.openweathermap.org/data/2.5/weather?id=' + weather_id, '&units=metric')
        wd = request.json()
-       return wd
     else:
        wd = ""
-       return wd
+    return wd
 
 
 def show_confirm(action):
