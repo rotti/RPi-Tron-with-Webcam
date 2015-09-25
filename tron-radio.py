@@ -39,12 +39,12 @@ yellow  = (255, 255,   0)
 orange  = (255, 127,   0)
 
 #my vars. usally for counters
-vol_set = "0"
-wd_count = 0
-wd = ""
-fc = ""
-confirm_reason = ""
-weather_id = "2871198"
+vol_set = "0" 
+wd_count = 0 #0 if we have not looked up for new wd
+wd = "" #weater_data
+fc = "" #forecast_data
+confirm_reason = "" #reboot, halt, quit, background
+weather_id = "2871198" #there is no place like 127.0.0.1
 
 #screen size
 width  = 320
@@ -89,7 +89,8 @@ playlist = " "
 #functions
 def internet_on():
     try:
-       response=urllib2.urlopen('http://74.125.228.100',timeout=1)
+       #response=urllib2.urlopen('http://173.194.40.247', timeout=1)
+       response=urllib2.urlopen('http://www.google.com', timeout=1)
        return True
     except urllib2.URLError as err: pass
     return False
@@ -136,20 +137,18 @@ def run_background():
 
 
 def get_forecast():
+    global fc
     if internet_on():
        request = requests.get('http://api.openweathermap.org/data/2.5/forecast/daily?id=' + weather_id, '&units=metric')
        fc = request.json()
-    else:
-       fc = ""
     return fc
 
 
 def get_weather():
+    global wd
     if internet_on():
        request = requests.get('http://api.openweathermap.org/data/2.5/weather?id=' + weather_id, '&units=metric')
        wd = request.json()
-    else:
-       wd = ""
     return wd
 
 
