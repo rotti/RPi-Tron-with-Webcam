@@ -74,7 +74,16 @@ Menu 1
   * Number of running processes
   * Disk free in % of /
   * Runs on screen 3
+* Confirmation Screen. We want to be sure for
+  * shutdown
+  * reboot
+  * quit
+  * run background
 
+
+##Known Issues
+Because graphics isn't my business there is no color switch for weather and confirmation screen.
+  
 
 ## Further tipps
 I installed [ympd](https://gist.github.com/nerab/37429abeaf4828484ab7) to get a small web service for the mpd. So I can operate the radio with my smartphone (or every other device with a web browser).
