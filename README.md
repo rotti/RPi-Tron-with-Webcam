@@ -81,6 +81,10 @@ Menu 1
   * run background
 
 
+##Openweather
+The Openweather API wants a key. For my own privacy reasons i wont push it up to github. The python script looks for the key in the file "openweather.key" in the same directory the radio script runs.
+
+
 ##Known Issues
 Because graphics isn't my business there is no color switch for weather and confirmation screen.
   
