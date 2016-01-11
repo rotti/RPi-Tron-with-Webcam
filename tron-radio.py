@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """
 RPi-Tron-Radio Clone ... added some more features (weather, confirmation, ...)
 
@@ -45,6 +47,10 @@ wd = "" #weater_data
 fc = "" #forecast_data
 confirm_reason = "" #reboot, halt, quit, background
 weather_id = "2871198" #there is no place like 127.0.0.1
+
+#openweather wants registered users from okt 2015 on
+with open('/home/pi/RPi-Tron-Radio/openweather.key', 'r') as weather_key:
+  openweather_key = weather_key.read().replace('\n', '')
 
 #screen size
 width  = 320
@@ -139,7 +145,7 @@ def run_background():
 def get_forecast():
     global fc
     if internet_on():
-       request = requests.get('http://api.openweathermap.org/data/2.5/forecast/daily?id=' + weather_id, '&units=metric')
+       request = requests.get('http://api.openweathermap.org/data/2.5/forecast/daily?id=' + weather_id, '&units=metric&appid=' + openweather_key)
        fc = request.json()
     return fc
 
@@ -147,7 +153,7 @@ def get_forecast():
 def get_weather():
     global wd
     if internet_on():
-       request = requests.get('http://api.openweathermap.org/data/2.5/weather?id=' + weather_id, '&units=metric')
+       request = requests.get('http://api.openweathermap.org/data/2.5/weather?id=' + weather_id, '&units=metric&appid=' + openweather_key)
        wd = request.json()
     return wd
 
@@ -170,7 +176,8 @@ def show_confirm(action):
 
 def show_weather(fc, wd):
     skin = skin3
-  
+
+    print fc
     day1_temp_day = fc['list'][1]['temp']['day']
     day2_temp_day = fc['list'][2]['temp']['day']
     day3_temp_day = fc['list'][3]['temp']['day']
