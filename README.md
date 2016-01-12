@@ -86,7 +86,8 @@ The Openweather API wants a key. For my own privacy reasons i wont push it up to
 
 
 ##Known Issues
-Because graphics isn't my business there is no color switch for weather and confirmation screen.
+* Because graphics isn't my business there is no color switch for weather and confirmation screen.
+* The image "Jessie" images listed on https://github.com/watterott/rpi-display made problems with the resolution. Better stay on "Wheezy"
   
 
 ## Further tipps
