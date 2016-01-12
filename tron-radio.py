@@ -157,7 +157,6 @@ def get_forecast():
 
 def get_weather():
     global wd
-    #if internet_on():
     if internet_on() and openweather_key:
        request = requests.get('http://api.openweathermap.org/data/2.5/weather?id=' + weather_id, '&units=metric&appid=' + openweather_key)
        wd = request.json()
