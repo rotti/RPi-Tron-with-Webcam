@@ -92,8 +92,8 @@ The Openweather API wants a key. For my own privacy reasons i wont push it up to
 
 ##Additional installation
 * Python request module (for openweather): 
-** sudo apt-get install python-pip
-** sudo pip install requests
+  * sudo apt-get install python-pip
+  * sudo pip install requests
 
 ## Further tipps
 I installed [ympd](https://gist.github.com/nerab/37429abeaf4828484ab7) to get a small web service for the mpd. So I can operate the radio with my smartphone (or every other device with a web browser).
