@@ -25,7 +25,10 @@ import requests
 import json
 import urllib2
 import os.path
+<<<<<<< HEAD
 import threading
+=======
+>>>>>>> 232679b2a41abe8829b3e099c519c5ef8a693baf
 
 os.environ["SDL_FBDEV"] = "/dev/fb1"
 os.environ["SDL_MOUSEDEV"] = "/dev/input/touchscreen"
