@@ -24,7 +24,6 @@ import re
 import requests
 import json
 import urllib2
-import os.path
 
 os.environ["SDL_FBDEV"] = "/dev/fb1"
 os.environ["SDL_MOUSEDEV"] = "/dev/input/touchscreen"
@@ -50,13 +49,8 @@ confirm_reason = "" #reboot, halt, quit, background
 weather_id = "2871198" #there is no place like 127.0.0.1
 
 #openweather wants registered users from okt 2015 on
-if os.path.exists('/home/pi/RPi-Tron-Radio/openweather.key'):
-    with open('/home/pi/RPi-Tron-Radio/openweather.key', 'r') as weather_key:
-        openweather_key = weather_key.read().replace('\n', '')
-else:
-     print "\n cannot find openweather.key file\n"
-     openweather_key = ""
-
+with open('/home/pi/RPi-Tron-Radio/openweather.key', 'r') as weather_key:
+  openweather_key = weather_key.read().replace('\n', '')
 
 #screen size
 width  = 320
@@ -101,6 +95,7 @@ playlist = " "
 #functions
 def internet_on():
     try:
+       #response=urllib2.urlopen('http://173.194.40.247', timeout=1)
        response=urllib2.urlopen('http://www.google.com', timeout=1)
        return True
     except urllib2.URLError as err: pass
@@ -149,7 +144,7 @@ def run_background():
 
 def get_forecast():
     global fc
-    if internet_on() and openweather_key:
+    if internet_on():
        request = requests.get('http://api.openweathermap.org/data/2.5/forecast/daily?id=' + weather_id, '&units=metric&appid=' + openweather_key)
        fc = request.json()
     return fc
@@ -157,7 +152,7 @@ def get_forecast():
 
 def get_weather():
     global wd
-    if internet_on() and openweather_key:
+    if internet_on():
        request = requests.get('http://api.openweathermap.org/data/2.5/weather?id=' + weather_id, '&units=metric&appid=' + openweather_key)
        wd = request.json()
     return wd
